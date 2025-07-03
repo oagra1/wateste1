@@ -1,57 +1,56 @@
-// pricing_pro_plan.js - Versão "tudo premium", ignora verificação de plano/código/pagamento
+// Sempre retorna PRO, bloqueia upgrades, oculta preços e botões de upgrade/ativação
 
+// Chama quando a página carregar
 $(function () {
   liberarPremium();
 });
 
-// Função que força sempre o modo PRO/premium
+// Força visualmente o modo PRO/premium
 function liberarPremium() {
-  // Ativa visualmente o modo premium
   $('.container-menu ul li').removeClass('active-li');
-  $('.container-menu ul li').eq(1).addClass('active-li'); // Supondo que 1 = PRO
+  $('.container-menu ul li').eq(1).addClass('active-li');
   $('.price-tab').hide();
   $('.price-tab').eq(1).show();
-
-  // Se quiser liberar também o plano vitalício, pode repetir para o index desejado
+  setTimeout(() => {
+    $('.container-menu ul li:eq(1)').text('PRO (Ativado)');
+    // Troca o "FREE" do topo por "PRO"
+    $('.header-right .user-type, .header-right .account-type, .header-right span:contains("Free")').text('PRO');
+    // Troca botões "Activate Code", "Upgrade" por vazio ou "Ativado"
+    $('.header-right a:contains("Activate Code"), .header-right a:contains("Upgrade")').text('PRO');
+  }, 500);
 }
 
-// "Fake" de funções do sistema original para garantir premium
+// Simula sempre usuário PRO
 window.getUserPermissioninfo = function() {
   return {
     permission: 'pro',
-    planGroup: 3,        // ou 5, se for vitalício
+    planGroup: 3,
     activeGroup: true,
     isPro: true,
     expireTime: '2099-12-31'
   }
 }
-
 window.isProUser = function() { return true }
 window.isPremium = function() { return true }
 
-// Se houver botões nos planos, faz todos abrirem a função PRO diretamente
+// Desativa botões de upgrade/código
 $('.trial-click').off('click').on('click', function () {
-  alert('Parabéns! Você já é usuário PRO/Premium!');
+  alert('Você já é usuário PRO/Premium!');
 });
-
-// Opcional: oculta botões de pagamento/código
 $('.trial-price, .trial-original-price').hide();
 $('#plan-free').hide();
 $('#plan-1').hide();
 $('#plan-9').hide();
 $('#plan-20').hide();
 
-// Opcional: mostra mensagem premium sempre
-setTimeout(() => {
-  $('.container-menu ul li:eq(1)').text('PRO (Ativado)');
-}, 500);
-
-// Proteção extra: impede qualquer chamada para funções de pagamento/código
 window.openOrder = function() {
   alert('Você já é usuário PRO/Premium!');
 }
-
-// Protege contra tentativas de downgrade
 window.freeUseNow = function() {
   alert('Você já está no melhor plano PRO/Premium!');
 }
+
+// Remove telas de bloqueio (tipo "Permission Limit")
+$(document).ready(function() {
+  $('.permission-limit, .permission-block, .pro-feature-limit').remove();
+});
